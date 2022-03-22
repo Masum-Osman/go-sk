@@ -9,13 +9,13 @@ import (
 	"time"
 )
 
-func worker() {
+func worker1() {
 	dt := time.Now()
 	fmt.Println(dt.Format(time.UnixDate))
 	time.Sleep(time.Second)
 }
 
-func main() {
+func main1() {
 	var wg sync.WaitGroup
 
 	sigs := make(chan os.Signal, 1)
@@ -34,7 +34,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		worker()
+		worker1()
 	}()
 
 	fmt.Println("awaiting signal")
