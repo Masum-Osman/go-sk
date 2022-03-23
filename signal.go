@@ -15,7 +15,7 @@ func worker1() {
 	time.Sleep(time.Second)
 }
 
-func main1() {
+func main10() {
 	var wg sync.WaitGroup
 
 	sigs := make(chan os.Signal, 1)

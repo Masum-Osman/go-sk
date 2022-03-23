@@ -13,7 +13,7 @@ func foo() {
 	}
 }
 
-func main0() {
+func main12() {
 	go foo()
 	// foo()
 	for true {

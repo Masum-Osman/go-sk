@@ -17,6 +17,6 @@ func timer(s int) {
 	}
 }
 
-func main() {
+func main0() {
 	go timer(10)
 }

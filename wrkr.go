@@ -14,7 +14,7 @@ func worker() {
 	}
 }
 
-func main() {
+func main1() {
 
 	var wg sync.WaitGroup
 
