@@ -14,8 +14,19 @@ type Tutorial struct {
 	Comments []Comment
 }
 
+type Book struct {
+	ID       int
+	Title    string
+	Price    float32
+	IsbnNo   string
+	Author   Author
+	Comments []Comment
+}
+
 type Author struct {
+	Id        int
 	Name      string
+	Biography string
 	Tutorials []int
 }
 
@@ -41,6 +52,8 @@ func populate() []Tutorial {
 }
 
 func main() {
+
+	tutorials := populate()
 
 	var commentType = graphql.NewObject(
 		graphql.ObjectConfig{
@@ -90,14 +103,29 @@ func main() {
 	fields := graphql.Fields{
 		"tutorial": &graphql.Field{
 			Type:        tutorialType,
-			Description: "Get All tutorials",
+			Description: "Get tutorial by ID",
 			Args: graphql.FieldConfigArgument{
 				"id": &graphql.ArgumentConfig{
 					Type: graphql.Int,
 				},
 			},
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return "world", nil
+				id, ok := p.Args["id"].(int)
+				if ok {
+					for _, tutorial := range tutorials {
+						if int(tutorial.ID) == id {
+							return tutorial, nil
+						}
+					}
+				}
+				return nil, nil
+			},
+		},
+		"list": &graphql.Field{
+			Type:        graphql.NewList(tutorialType),
+			Description: "Get Full Tutorial List",
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				return tutorials, nil
 			},
 		},
 	}
@@ -112,7 +140,9 @@ func main() {
 
 	query := `
 	{
-		hello
+		list {
+			title
+		}
 	}
 	`
 	params := graphql.Params{Schema: schema, RequestString: query}
