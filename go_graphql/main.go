@@ -15,19 +15,18 @@ type Tutorial struct {
 }
 
 type Book struct {
-	ID       int
-	Title    string
-	Price    float32
-	IsbnNo   string
-	Author   Author
-	Comments []Comment
+	ID     int
+	Title  string
+	Price  float32
+	IsbnNo string
+	Author Author
 }
 
 type Author struct {
 	Id        int
 	Name      string
 	Biography string
-	Tutorials []int
+	Books     []int
 }
 
 type Comment struct {
@@ -35,7 +34,7 @@ type Comment struct {
 }
 
 func populate() []Tutorial {
-	author := &Author{Name: "E Forbes", Tutorials: []int{1}}
+	author := &Author{Name: "E Forbes", Books: []int{1}}
 	tutorial := Tutorial{
 		ID:     1,
 		Title:  "Go GraphQL",
@@ -51,9 +50,31 @@ func populate() []Tutorial {
 	return tutorials
 }
 
+func populateBooks() []Book {
+	author := &Author{
+		Id:        1,
+		Name:      "Dan Brown",
+		Biography: "All time Best Seller",
+		Books:     []int{1},
+	}
+	book := Book{
+		ID:     1,
+		Title:  "Angels and Demons",
+		Price:  500.00,
+		IsbnNo: "978-3-16-148410-0",
+		Author: *author,
+	}
+
+	var books []Book
+	books = append(books, book)
+
+	return books
+}
+
 func main() {
 
 	tutorials := populate()
+	books := populateBooks()
 
 	var commentType = graphql.NewObject(
 		graphql.ObjectConfig{
@@ -70,15 +91,57 @@ func main() {
 		graphql.ObjectConfig{
 			Name: "Author",
 			Fields: graphql.Fields{
-				"Name": &graphql.Field{
+				"id": &graphql.Field{
+					Type: graphql.Int,
+				},
+				"name": &graphql.Field{
 					Type: graphql.String,
 				},
-				"Tutorials": &graphql.Field{
-					Type: graphql.NewList(graphql.Int),
+				"biography": &graphql.Field{
+					Type: graphql.String,
 				},
 			},
 		},
 	)
+
+	var booksType = graphql.NewObject(
+		graphql.ObjectConfig{
+			Name: "Books",
+			Fields: graphql.Fields{
+				"id": &graphql.Field{
+					Type: graphql.Int,
+				},
+				"title": &graphql.Field{
+					Type: graphql.String,
+				},
+				"price": &graphql.Field{
+					Type: graphql.Float,
+				},
+				"isbn_no": &graphql.Field{
+					Type: graphql.String,
+				},
+				"authors": &graphql.Field{
+					Type: graphql.NewList(authorType),
+				},
+			},
+		},
+	)
+
+	/*
+			var authorType = graphql.NewObject(
+			graphql.ObjectConfig{
+				Name: "Author",
+				Fields: graphql.Fields{
+					"Name": &graphql.Field{
+						Type: graphql.String,
+					},
+					"Tutorials": &graphql.Field{
+						Type: graphql.NewList(graphql.Int),
+					},
+				},
+			},
+		)
+	*/
 
 	var tutorialType = graphql.NewObject(
 		graphql.ObjectConfig{
@@ -128,6 +191,13 @@ func main() {
 				return tutorials, nil
 			},
 		},
+		"books": &graphql.Field{
+			Type:        graphql.NewList(booksType),
+			Description: "Get Full Book List",
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				return books, nil
+			},
+		},
 	}
 
 	rootQuery := graphql.ObjectConfig{Name: "RootQuery", Fields: fields}
@@ -140,11 +210,21 @@ func main() {
 
 	query := `
 	{
-		list {
-			title
+		books{
+			authors {
+				id
+				name
+				biography
+			}
 		}
 	}
 	`
+	// books {
+	// 	id
+	// 	title
+	// 	price
+	// 	isbn_no
+	// }
 	params := graphql.Params{Schema: schema, RequestString: query}
 	r := graphql.Do(params)
 	if len(r.Errors) > 0 {
