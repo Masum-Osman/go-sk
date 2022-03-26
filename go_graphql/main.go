@@ -121,7 +121,7 @@ func main() {
 					Type: graphql.String,
 				},
 				"authors": &graphql.Field{
-					Type: graphql.NewList(authorType),
+					Type: authorType,
 				},
 			},
 		},
@@ -198,6 +198,13 @@ func main() {
 				return books, nil
 			},
 		},
+		"authors": &graphql.Field{
+			Type:        graphql.NewList(authorType),
+			Description: "Get Full Book List",
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				return books, nil
+			},
+		},
 	}
 
 	rootQuery := graphql.ObjectConfig{Name: "RootQuery", Fields: fields}
@@ -211,6 +218,10 @@ func main() {
 	query := `
 	{
 		books{
+			id
+			title
+			price
+			isbn_no
 			authors {
 				id
 				name
